@@ -59,14 +59,15 @@ class AdvRoom:
         """Returns the list of lines describing this room."""
         return self._long_description
 
-    def get_next_room(self, travel_command: str):
+    def get_connected_room(self, exit_command: str):
         """
-        Tries to look up the name of a neighboring room associated with the given travel command word
-         (such as "NORTH", or "IN").
-        :param travel_command: A string containing, typically, a travel direction such as "SOUTH" or "OUT".
+        Tries to look up the name of a neighboring room associated with the given room exiting travel command word
+        (such as "NORTH", or "IN").
+
+        :param exit_command: A string containing, typically, a travel direction such as "SOUTH" or "OUT".
         :return: The ID of the neighboring connected room, if there is one connected via the given command word.
         """
-        
+        return self._exits.get(exit_command)
 
     @staticmethod
     def read_room(room_file: typing.TextIO):

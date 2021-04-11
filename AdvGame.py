@@ -39,11 +39,11 @@ class AdvGame:
             for line in room.get_long_description():
                 print(line)
             user_input = input("> ").strip().upper()
-            next_room = room.get_next_room(user_input)
-            if next_room is None:
+            neighboring_room = room.get_connected_room(user_input)
+            if neighboring_room is None:
                 print("I don't know how to apply that word here.")
             else:
-                cur_room = next_room
+                cur_room = neighboring_room
 
     @staticmethod
     def read_adventure(file):
