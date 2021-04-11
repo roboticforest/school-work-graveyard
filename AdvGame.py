@@ -16,19 +16,58 @@ necessary to play a game.
 
 from AdvRoom import AdvRoom
 
+
 class AdvGame:
 
-    def __init__(self, prefix):
-        """Reads the game data from files with the specified prefix."""
+    def __init__(self, rooms):
+        """
+        Initializes a new AdvGame with the given rooms for players to navigate.
 
-    def get_room(self, name):
+        :param rooms: The world that makes up the adventure for players to play through.
+        """
+        self._rooms = rooms
+
+    def get_room(self, name: str):
         """Returns the AdvRoom object with the specified name."""
+        return self._rooms[name]
 
     def run(self):
         """Plays the adventure game stored in this object."""
+        cur_room = "START"
+        while cur_room != "EXIT":
+            room: AdvRoom = self.get_room(cur_room)
+            for line in room.get_long_description():
+                print(line)
+            user_input = input("> ").strip().upper()
+            next_room = room.get_next_room(user_input)
+            if next_room is None:
+                print("I don't know how to apply that word here.")
+            else:
+                cur_room = next_room
+
+    @staticmethod
+    def read_adventure(file):
+        """
+        Reads Room data from the given file object and constructs an Adventure Game.
+
+        :param file: On open file object containing the adventure data.
+        :return: A new Adventure Game instance.
+        """
+        rooms = {}
+        finished = False
+        while not finished:
+            room: AdvRoom = AdvRoom.read_room(file)
+            if room is None:
+                finished = True
+            else:
+                name = room.get_name()
+                if len(rooms) == 0:
+                    rooms["START"] = room
+                rooms[name] = room
+        return AdvGame(rooms)
+
 
 # Constants
-
 HELP_TEXT = [
     "Welcome to Adventure!",
     "Somewhere nearby is Colossal Cave, where others have found fortunes in",
