@@ -36,8 +36,12 @@ class AdvGame:
         cur_room = "START"
         while cur_room != "EXIT":
             room: AdvRoom = self.get_room(cur_room)
-            for line in room.get_long_description():
-                print(line)
+            if room.has_been_visited():
+                print(room.get_short_description())
+            else:
+                room.set_visited(True)
+                for line in room.get_long_description():
+                    print(line)
             user_input = input("> ").strip().upper()
             neighboring_room = room.get_connected_room(user_input)
             if neighboring_room is None:
