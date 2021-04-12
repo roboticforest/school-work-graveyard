@@ -46,6 +46,7 @@ class AdvRoom:
         self._short_description = short_desc
         self._long_description = long_desc
         self._exits = room_exits
+        self._visited = False
 
     def get_name(self) -> str:
         """Returns the name of this room."""
@@ -68,6 +69,12 @@ class AdvRoom:
         :return: The ID of the neighboring connected room, if there is one connected via the given command word.
         """
         return self._exits.get(exit_command)
+
+    def set_visited(self, is_visited: bool):
+        self._visited = is_visited
+
+    def has_been_visited(self) -> bool:
+        return self._visited
 
     @staticmethod
     def read_room(room_file: typing.TextIO):
