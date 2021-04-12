@@ -4,6 +4,7 @@
 This module defines a class that models an object in Adventure.
 """
 
+
 ###########################################################################
 # Your job in this assignment is to fill in the definitions of the        #
 # methods listed in this file, along with any helper methods you need.    #
