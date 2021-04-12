@@ -29,13 +29,13 @@ class AdvGame:
 
     def get_room(self, name: str):
         """Returns the AdvRoom object with the specified name."""
-        return self._rooms[name]
+        return self._rooms.get(name)
 
     def run(self):
         """Plays the adventure game stored in this object."""
-        cur_room = "START"
-        while cur_room != "EXIT":
-            room: AdvRoom = self.get_room(cur_room)
+
+        def display_room(room: AdvRoom):
+            """Helper function for printing room descriptions based on if the room has been visited."""
             if room.has_been_visited():
                 print(room.get_short_description())
             else:
@@ -43,23 +43,41 @@ class AdvGame:
                 for line in room.get_long_description():
                     print(line)
 
+        playing_game = True
+        cur_room: AdvRoom = self.get_room("START")
+        display_room(cur_room)
+        while playing_game:
+
             # Capture user input and break into tokens using whitespace.
             user_input = []
             while not user_input:
                 user_input = input("> ").upper().split()
 
             # Check for action verbs.
-            if user_input[0] == "QUIT":
-                cur_room = "EXIT"
-                # print("Goodbye for now.")
+            command = user_input[0]
+            if command == "QUIT":
+                playing_game = False
+                continue
+            elif command == "HELP":
+                for line in HELP_TEXT:
+                    print(line)
+                continue
+            elif command == "LOOK":
+                for line in cur_room.get_long_description():
+                    print(line)
                 continue
 
             # Check for motion verbs.
-            neighboring_room = room.get_connected_room(user_input[0])
-            if neighboring_room is None:
+            neighboring_room_id = cur_room.get_connected_room_name(user_input[0])
+            if neighboring_room_id is None:
                 print("I don't know how to apply that word here.")
+                continue
+            elif neighboring_room_id == "EXIT":
+                playing_game = False
+                print("GAME OVER!")
             else:
-                cur_room = neighboring_room
+                cur_room = self.get_room(neighboring_room_id)
+                display_room(cur_room)
 
     @staticmethod
     def read_adventure(file):

@@ -60,7 +60,7 @@ class AdvRoom:
         """Returns the list of lines describing this room."""
         return self._long_description
 
-    def get_connected_room(self, exit_command: str):
+    def get_connected_room_name(self, exit_command: str):
         """
         Tries to look up the name of a neighboring room associated with the given room exiting travel command word
         (such as "NORTH", or "IN").
