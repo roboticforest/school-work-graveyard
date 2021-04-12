@@ -42,8 +42,20 @@ class AdvGame:
                 room.set_visited(True)
                 for line in room.get_long_description():
                     print(line)
-            user_input = input("> ").strip().upper()
-            neighboring_room = room.get_connected_room(user_input)
+
+            # Capture user input and break into tokens using whitespace.
+            user_input = []
+            while not user_input:
+                user_input = input("> ").upper().split()
+
+            # Check for action verbs.
+            if user_input[0] == "QUIT":
+                cur_room = "EXIT"
+                # print("Goodbye for now.")
+                continue
+
+            # Check for motion verbs.
+            neighboring_room = room.get_connected_room(user_input[0])
             if neighboring_room is None:
                 print("I don't know how to apply that word here.")
             else:
