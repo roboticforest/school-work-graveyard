@@ -47,6 +47,19 @@ class AdvRoom:
         self._long_description = long_desc
         self._exits = room_exits
         self._visited = False
+        self._objects = set()
+
+    def add_object(self, name: str):
+        pass  # Looks up an object from AdvGame, using the given name.
+
+    def remove_object(self, name: str):
+        pass  # Checks for given object by name and removes it from the room.
+
+    def contains_object(self, name: str) -> bool:
+        pass  # Returns true if the given object
+
+    def get_contents(self) -> set:
+        return self._objects.copy()
 
     def get_name(self) -> str:
         """Returns the name of this room."""
