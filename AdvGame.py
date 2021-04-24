@@ -44,9 +44,15 @@ class AdvGame:
                 if loc != "PLAYER":  # TODO: Add Player handling.
                     self._rooms[loc].add_object(item_name)
 
-        def display_room(room: AdvRoom):
-            """Helper function for printing room descriptions based on if the room has been visited."""
-            if room.has_been_visited():
+        def display_room(room: AdvRoom, req_full_desc: bool = False):
+            """
+            Helper function for printing room descriptions based on if the room has been visited.
+
+            :param room: The room to print the description of.
+            :param req_full_desc: Require that the full description of the room and all contained items be printed, even
+             if the room has been visited by the player.
+            """
+            if room.has_been_visited() and not req_full_desc:
                 print(room.get_short_description())
             else:
                 room.set_visited(True)
@@ -78,14 +84,29 @@ class AdvGame:
                     print(line)
                 continue
             elif command == "LOOK":
-                for line in cur_room.get_long_description():
-                    print(line)
+                display_room(cur_room, req_full_desc=True)
                 continue
 
             # Check for motion verbs.
-            neighboring_room_id = cur_room.get_connected_room_name(user_input[0])
+            if command == "GO" and len(user_input) > 1:  # Small extension, and an easter egg.
+                if user_input[1] == "DENNIS":  # "... Obvious exits are NORTH, SOUTH, and DENNIS."
+                    print("YOU ARE THY DUNGEONMAN!")
+                    print("Ye arrive at Dennis. He wears a sporty frock coat and a long jimberjam.",
+                          "He paces about nervously. Obvious exits are NOT DENNIS.")
+                    print("> NOT DENNIS")
+                    display_room(cur_room, req_full_desc=True)
+                    continue
+                command = user_input[1]
+
+            neighboring_room_id = cur_room.get_connected_room_name(command)
             if neighboring_room_id is None:
-                print("I don't know how to apply that word here.")
+                # Small extension to project guide.
+                # If the command was a movement verb of some sort, print a more appropriate message.
+                if command in ["NORTH", "SOUTH", "EAST", "WEST", "IN", "OUT", "UP", "DOWN", "FLY", "XYZZY",
+                               "TELEPORT", "TRANSPORT", "ENTER", "LEAVE", "EXIT", "CLIMB", "JUMP", "CRAWL", "GO"]:
+                    print("You can't go that way.")
+                else:
+                    print("I don't know how to apply that word here.")
                 continue
             elif neighboring_room_id == "EXIT":
                 playing_game = False
