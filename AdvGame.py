@@ -93,8 +93,9 @@ class AdvGame:
                 if len(self._player_inventory) < 1:
                     print("You are empty-handed.")
                 else:
+                    print("You are carrying:")
                     for item in self._player_inventory:
-                        print(self._all_objects[item].get_description())
+                        print(" ", self._all_objects[item].get_description())
                 continue
             elif command == "DROP":
                 if len(user_input) > 1:
@@ -102,7 +103,7 @@ class AdvGame:
                     if item in self._player_inventory:
                         self._player_inventory.remove(item)
                         cur_room.add_object(item)
-                        print("You set down", self._all_objects[item].get_description())
+                        print("You set down " + self._all_objects[item].get_description() + ".")
                     else:
                         print("You are not carrying that.")
                 else:
@@ -114,7 +115,7 @@ class AdvGame:
                     if item in cur_room.get_contents():
                         cur_room.remove_object(item)
                         self._player_inventory.add(item)
-                        print("You pick up", self._all_objects[item].get_description())
+                        print("You pick up " + self._all_objects[item].get_description() + ".")
                     else:
                         print("That is not here.")
                 else:
