@@ -96,6 +96,17 @@ class AdvGame:
                     for item in self._player_inventory:
                         print(self._all_objects[item].get_description())
                 continue
+            elif command == "DROP":
+                if len(user_input) > 1:
+                    item = user_input[1]  # For clarity of code.
+                    if item in self._player_inventory:
+                        self._player_inventory.remove(item)
+                        cur_room.add_object(item)
+                    else:
+                        print("You are not carrying that item.")
+                else:
+                    print("Drop what?")
+                continue
 
             # Check for motion verbs.
             if command == "GO" and len(user_input) > 1:  # Small extension, and an easter egg.
