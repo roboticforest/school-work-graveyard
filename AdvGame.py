@@ -14,6 +14,7 @@ necessary to play a game.
 # into helper methods will be essential.                                  #
 ###########################################################################
 
+from AdvObject import AdvObject
 from AdvRoom import AdvRoom
 
 
@@ -26,6 +27,7 @@ class AdvGame:
         :param rooms: The world that makes up the adventure for players to play through.
         """
         self._rooms = rooms
+        self._objects = {}
 
     def get_room(self, name: str):
         """Returns the AdvRoom object with the specified name."""
@@ -79,18 +81,35 @@ class AdvGame:
                 cur_room = self.get_room(neighboring_room_id)
                 display_room(cur_room)
 
+    def read_objects(self, object_file):
+        """
+        Reads game objects from the given file instance and adds any found to the appropriate location with the game.
+
+        :param object_file: An open file instance containing the game objects to add to the game world.
+        :return: Nothing
+        """
+        objects = {}
+        finished = False
+        while not finished:
+            game_object: AdvObject = AdvObject.read_object(object_file)
+            if game_object is None:
+                finished = True
+            else:
+                objects[game_object.get_name()] = game_object
+        self._objects = objects
+
     @staticmethod
-    def read_adventure(file):
+    def read_adventure(room_file):
         """
         Reads Room data from the given file object and constructs an Adventure Game.
 
-        :param file: On open file object containing the adventure data.
+        :param room_file: An open file object containing the adventure data.
         :return: A new Adventure Game instance.
         """
         rooms = {}
         finished = False
         while not finished:
-            room: AdvRoom = AdvRoom.read_room(file)
+            room: AdvRoom = AdvRoom.read_room(room_file)
             if room is None:
                 finished = True
             else:

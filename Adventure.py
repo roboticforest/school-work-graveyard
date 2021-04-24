@@ -8,6 +8,9 @@ from AdvGame import AdvGame
 DATA_FILE_PREFIX = "Tiny"
 
 
+# DATA_FILE_PREFIX = "blork"
+
+
 # Main program
 def adventure():
     """
@@ -16,7 +19,11 @@ def adventure():
     :return: Nothing.
     """
     game = load_adventure_game()
-    game.run()
+    if game is None:
+        print("Failed to load the adventure. Game could not start.")
+        return
+    else:
+        game.run()
 
 
 def load_adventure_game():
@@ -25,13 +32,34 @@ def load_adventure_game():
 
     :return: A new Adventure Game instance.
     """
+
+    adventure_file = DATA_FILE_PREFIX + "Rooms.txt"
     try:
-        adventure_file = DATA_FILE_PREFIX + "Rooms.txt"
         with open(adventure_file) as room_file:
-            return AdvGame.read_adventure(room_file)
+            the_adventure = AdvGame.read_adventure(room_file)
     except IOError as err:
-        print("Could not load the Adventure Game from file:", adventure_file)
         print(err)
+        print("Could not load the Adventure Game from file:", adventure_file)
+        return None
+
+    try:
+        object_filename = DATA_FILE_PREFIX + "Objects.txt"
+        with open(object_filename, "rt") as obj_file:
+            the_adventure.read_objects(obj_file)
+    except IOError as err:
+        # Missing object file is not an error.
+        pass
+
+    try:
+        pass
+        # synonyms_filename = DATA_FILE_PREFIX + "Synonyms.txt"
+        # with open(synonyms_filename, "rt") as names_file:
+        #     the_adventure.read_synonyms(names_file)
+    except IOError as err:
+        # Missing synonym file is not an error.
+        pass
+
+    return the_adventure
 
 
 # Startup code
