@@ -29,6 +29,7 @@ class AdvGame:
         """
         self._rooms = rooms
         self._all_objects = {}
+        self._player_inventory = set()
 
     def get_room(self, name: str):
         """Returns the AdvRoom object with the specified name."""
@@ -41,8 +42,10 @@ class AdvGame:
         if len(self._all_objects) > 0:
             for item_name in self._all_objects:
                 loc = self._all_objects[item_name].get_initial_location()
-                if loc != "PLAYER":  # TODO: Add Player handling.
+                if loc != "PLAYER":
                     self._rooms[loc].add_object(item_name)
+                else:
+                    self._player_inventory.add(item_name)
 
         def display_room(room: AdvRoom, req_full_desc: bool = False):
             """
@@ -85,6 +88,13 @@ class AdvGame:
                 continue
             elif command == "LOOK":
                 display_room(cur_room, req_full_desc=True)
+                continue
+            elif command == "INVENTORY":
+                if len(self._player_inventory) < 1:
+                    print("You are empty-handed.")
+                else:
+                    for item in self._player_inventory:
+                        print(self._all_objects[item].get_description())
                 continue
 
             # Check for motion verbs.
