@@ -19,6 +19,7 @@ from AdvRoom import AdvRoom
 
 
 class AdvGame:
+    """Represents and runs an Adventure style game."""
 
     def __init__(self, rooms):
         """
@@ -36,8 +37,8 @@ class AdvGame:
     def run(self):
         """Plays the adventure game stored in this object."""
 
+        # Place all objects into the game world, if any have been loaded.
         if len(self._all_objects) > 0:
-            # Place all objects in the game world.
             for item_name in self._all_objects:
                 loc = self._all_objects[item_name].get_initial_location()
                 if loc != "PLAYER":  # TODO: Add Player handling.
@@ -51,6 +52,8 @@ class AdvGame:
                 room.set_visited(True)
                 for line in room.get_long_description():
                     print(line)
+
+            # Display any objects that may be in the room.
             room_objects = room.get_contents()
             if len(room_objects) > 0:
                 for item in room_objects:
@@ -93,7 +96,8 @@ class AdvGame:
 
     def read_objects(self, object_file):
         """
-        Reads game objects from the given file instance and adds any found to the appropriate location with the game.
+        Loads game objects from the given file object into memory. This function must be called before the game is run for
+        objects to be place into the game world.
 
         :param object_file: An open file instance containing the game objects to add to the game world.
         :return: Nothing
@@ -111,10 +115,10 @@ class AdvGame:
     @staticmethod
     def read_adventure(room_file):
         """
-        Reads Room data from the given file object and constructs an Adventure Game.
+        Reads room description data from the given file object and constructs an Adventure style game.
 
         :param room_file: An open file object containing the adventure data.
-        :return: A new Adventure Game instance.
+        :return: A new Adventure game instance.
         """
         rooms = {}
         finished = False

@@ -16,6 +16,7 @@ import typing
 ###########################################################################
 
 class AdvObject:
+    """Represents an object the player can interact with, and which can be placed in a room."""
 
     def __init__(self, name: str, description: str, location_room_id: str):
         """Creates an AdvObject from the specified properties."""
@@ -27,15 +28,15 @@ class AdvObject:
         """Converts an AdvObject to a string."""
         return "There is " + self._description + " here."
 
-    def get_name(self):
+    def get_name(self) -> str:
         """Returns the name of this object."""
         return self._name
 
-    def get_description(self):
+    def get_description(self) -> str:
         """Returns the description of this object."""
         return self._description
 
-    def get_initial_location(self):
+    def get_initial_location(self) -> str:
         """Returns the initial location of this object."""
         return self._location
 
@@ -50,7 +51,7 @@ class AdvObject:
           RoomIDLocationOfObject
 
         :param obj_file: An open file object connected to a text file containing object data.
-        :return: None if an object could not be properly read, otherwise an AdvObject instance.
+        :return: None if an object could not be properly read (or EOF is reached), otherwise an AdvObject instance.
         """
 
         obj_name = ""

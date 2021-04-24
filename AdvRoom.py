@@ -26,14 +26,16 @@ from text_utils import ordinal_str
 
 # Constants
 
+# Separates the room description and room exit list. Complete sets of room information are separated by a blank line.
 MARKER = "-----"
 
 
 class AdvRoom:
+    """Represents an individual room within an Adventure style text game."""
 
     def __init__(self, name: str, short_desc: str, long_desc: list, room_exits: dict):
         """
-        Initialized an Adventure Room object with the specified attributes.
+        Initializes an Adventure Room object with the specified attributes.
 
         :param name: The unique ID of the room. This should be a human readable plain text string, like "EndOfRoad".
         :param short_desc: A single line description of the room to display to the player.
@@ -49,16 +51,39 @@ class AdvRoom:
         self._visited = False
         self._objects = set()
 
-    def add_object(self, name: str):
-        self._objects.add(name)
+    def add_object(self, obj_name: str):
+        """
+        Places the named game object within the room.
+        
+        :param obj_name: The name of the object to add into the room.
+        :return: Nothing.
+        """
+        self._objects.add(obj_name)
 
     def remove_object(self, name: str):
+        """
+        Takes the named game object out of the room.
+
+        :param name: The name of the object to remove.
+        :return: Nothing.
+        """
         self._objects.remove(name)
 
     def contains_object(self, name: str) -> bool:
+        """
+        Checks to see if the named game object is contained within the room.
+
+        :param name: The name of the object to search for.
+        :return: True if the given name matches the name of an object within the room, False otherwise.
+        """
         return name in self._objects
 
     def get_contents(self) -> set:
+        """
+        Gets the names of all game objects contained within the room.
+
+        :return: A set listing the names of all objects contained within the room.
+        """
         return self._objects.copy()
 
     def get_name(self) -> str:
@@ -84,9 +109,11 @@ class AdvRoom:
         return self._exits.get(exit_command)
 
     def set_visited(self, is_visited: bool):
+        """Marks this room as having been visited by the player."""
         self._visited = is_visited
 
     def has_been_visited(self) -> bool:
+        """Checks to see if this room has been visited by the player."""
         return self._visited
 
     @staticmethod
@@ -105,7 +132,7 @@ class AdvRoom:
           VERB: AnotherRoom/ITEM
 
         :param room_file: An open file object connected to a text file containing room data.
-        :return: None if a room could not be properly read, otherwise an AdvRoom object.
+        :return: None if a room could not be properly read (or if EOF is reached), otherwise an AdvRoom object.
         """
 
         # Setup a small helper to minimize typos, and ensure consistent line counting.
