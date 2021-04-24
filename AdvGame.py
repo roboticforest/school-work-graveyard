@@ -102,10 +102,23 @@ class AdvGame:
                     if item in self._player_inventory:
                         self._player_inventory.remove(item)
                         cur_room.add_object(item)
+                        print("You set down", self._all_objects[item].get_description())
                     else:
-                        print("You are not carrying that item.")
+                        print("You are not carrying that.")
                 else:
                     print("Drop what?")
+                continue
+            elif command == "TAKE":
+                if len(user_input) > 1:
+                    item = user_input[1]  # For clarity of code.
+                    if item in cur_room.get_contents():
+                        cur_room.remove_object(item)
+                        self._player_inventory.add(item)
+                        print("You pick up", self._all_objects[item].get_description())
+                    else:
+                        print("That is not here.")
+                else:
+                    print("Take what?")
                 continue
 
             # Check for motion verbs.
