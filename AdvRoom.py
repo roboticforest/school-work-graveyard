@@ -50,13 +50,13 @@ class AdvRoom:
         self._objects = set()
 
     def add_object(self, name: str):
-        pass  # Looks up an object from AdvGame, using the given name.
+        self._objects.add(name)
 
     def remove_object(self, name: str):
-        pass  # Checks for given object by name and removes it from the room.
+        self._objects.remove(name)
 
     def contains_object(self, name: str) -> bool:
-        pass  # Returns true if the given object
+        return name in self._objects
 
     def get_contents(self) -> set:
         return self._objects.copy()

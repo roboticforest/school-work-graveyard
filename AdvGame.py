@@ -27,7 +27,7 @@ class AdvGame:
         :param rooms: The world that makes up the adventure for players to play through.
         """
         self._rooms = rooms
-        self._objects = {}
+        self._all_objects = {}
 
     def get_room(self, name: str):
         """Returns the AdvRoom object with the specified name."""
@@ -35,6 +35,13 @@ class AdvGame:
 
     def run(self):
         """Plays the adventure game stored in this object."""
+
+        if len(self._all_objects) > 0:
+            # Place all objects in the game world.
+            for item_name in self._all_objects:
+                loc = self._all_objects[item_name].get_initial_location()
+                if loc != "PLAYER":  # TODO: Add Player handling.
+                    self._rooms[loc].add_object(item_name)
 
         def display_room(room: AdvRoom):
             """Helper function for printing room descriptions based on if the room has been visited."""
@@ -44,12 +51,15 @@ class AdvGame:
                 room.set_visited(True)
                 for line in room.get_long_description():
                     print(line)
+            room_objects = room.get_contents()
+            if len(room_objects) > 0:
+                for item in room_objects:
+                    print(self._all_objects.get(item))
 
         playing_game = True
         cur_room: AdvRoom = self.get_room("START")
         display_room(cur_room)
         while playing_game:
-
             # Capture user input and break into tokens using whitespace.
             user_input = []
             while not user_input:
@@ -96,7 +106,7 @@ class AdvGame:
                 finished = True
             else:
                 objects[game_object.get_name()] = game_object
-        self._objects = objects
+        self._all_objects = objects
 
     @staticmethod
     def read_adventure(room_file):

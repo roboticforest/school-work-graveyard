@@ -70,7 +70,7 @@ class AdvObject:
 
             # If here, then obj_name has content and the next two lines shouldn't be empty.
             description = obj_file.readline().strip()
-            room_id = obj_file.readline().strip().upper()
+            room_id = obj_file.readline().strip()
             done = True
 
         if obj_name == "" or description == "" or room_id == "":

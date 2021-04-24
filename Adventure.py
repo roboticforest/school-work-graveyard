@@ -5,7 +5,7 @@
 from AdvGame import AdvGame
 
 # Constants
-DATA_FILE_PREFIX = "Tiny"
+DATA_FILE_PREFIX = "Small"
 
 
 # DATA_FILE_PREFIX = "blork"
