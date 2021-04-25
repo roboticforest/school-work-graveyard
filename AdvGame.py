@@ -70,6 +70,15 @@ class AdvGame:
                 for item in room_objects:
                     print(self._all_objects.get(item))
 
+        def resolve_synonym(name: str) -> str:
+            """Helper function to look up synonyms."""
+            result = self._synonyms.get(name)
+            if result is None:
+                return name
+            else:
+                return result
+
+        # Main game loop and user input processing.
         playing_game = True
         cur_room: AdvRoom = self.get_room("START")
         display_room(cur_room)
@@ -81,6 +90,7 @@ class AdvGame:
 
             # Check for action verbs.
             command = user_input[0]
+            command = resolve_synonym(command)
             if command == "QUIT":
                 playing_game = False
                 continue
@@ -102,6 +112,7 @@ class AdvGame:
             elif command == "DROP":
                 if len(user_input) > 1:
                     item = user_input[1]  # For clarity of code.
+                    item = resolve_synonym(item)
                     if item in self._player_inventory:
                         self._player_inventory.remove(item)
                         cur_room.add_object(item)
@@ -114,6 +125,7 @@ class AdvGame:
             elif command == "TAKE":
                 if len(user_input) > 1:
                     item = user_input[1]  # For clarity of code.
+                    item = resolve_synonym(item)
                     if item in cur_room.get_contents():
                         cur_room.remove_object(item)
                         self._player_inventory.add(item)
@@ -134,6 +146,7 @@ class AdvGame:
                     display_room(cur_room, req_full_desc=True)
                     continue
                 command = user_input[1]
+                command = resolve_synonym(command)
 
             neighboring_room_id = cur_room.get_connected_room_name(command)
             if neighboring_room_id is None:
@@ -197,7 +210,7 @@ class AdvGame:
                 done = True
             line = line.strip().upper()
             if line == "":  # If we read a blank line.
-                continue    # read another line.
+                continue  # read another line.
 
             # A valid line was read. Start parsing...
             split_loc = line.find("=")
@@ -207,7 +220,7 @@ class AdvGame:
                 continue
 
             synonym = line[:split_loc]
-            original_name = line[split_loc+1:]
+            original_name = line[split_loc + 1:]
             names[synonym] = original_name
 
         self._synonyms = names
