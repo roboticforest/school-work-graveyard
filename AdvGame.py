@@ -162,11 +162,15 @@ class AdvGame:
 
             # "GO" is mostly implemented for an easter egg, but motion verbs follow it naturally and allowing it covers
             # more use cases.
+            if command == "GO" and len(user_input) == 1:
+                print("Go where?")
+                continue
             if command == "GO" and len(user_input) > 1:  # Small extension, and an easter egg.
                 if user_input[1] == "DENNIS":  # "... Obvious exits are NORTH, SOUTH, and DENNIS."
                     print("YOU ARE THY DUNGEONMAN!")
-                    print("Ye arrive at Dennis. He wears a sporty frock coat and a long jimberjam.",
-                          "He paces about nervously. Obvious exits are NOT DENNIS.")
+                    print("Ye arrive at Dennis. He wears a sporty frock coat and a")
+                    print("long jimberjam. He paces about nervously. Obvious exits")
+                    print("are NOT DENNIS.")
                     print("> NOT DENNIS")
                     display_room(cur_room, req_full_desc=True)
                     continue
