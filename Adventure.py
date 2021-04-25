@@ -5,7 +5,7 @@
 from AdvGame import AdvGame
 
 # Constants
-DATA_FILE_PREFIX = "Small"
+DATA_FILE_PREFIX = "Crowther"
 
 
 # Main program
