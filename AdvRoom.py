@@ -33,7 +33,7 @@ MARKER = "-----"
 class AdvRoom:
     """Represents an individual room within an Adventure style text game."""
 
-    def __init__(self, name: str, short_desc: str, long_desc: list, room_exits: dict):
+    def __init__(self, name: str, short_desc: str, long_desc: list, room_exits: list):
         """
         Initializes an Adventure Room object with the specified attributes.
 
@@ -98,15 +98,16 @@ class AdvRoom:
         """Returns the list of lines describing this room."""
         return self._long_description
 
-    def get_connected_room_name(self, exit_command: str):
+    def get_connected_rooms(self, exit_command: str) -> list:
         """
-        Tries to look up the name of a neighboring room associated with the given room exiting travel command word
-        (such as "NORTH", or "IN").
+        Attempts to retrieve all room connections associated with the given room exiting travel command word (such as
+        "NORTH", or "IN").
 
         :param exit_command: A string containing, typically, a travel direction such as "SOUTH" or "OUT".
-        :return: The ID of the neighboring connected room, if there is one connected via the given command word.
+        :return: A list of all neighboring connected rooms (if there are any) connected via the given command word. Each
+         connected room is described as the following tuple: (exit_command, destination_room, requirement)
         """
-        return self._exits.get(exit_command)
+        return [room for room in self._exits if exit_command in room]
 
     def set_visited(self, is_visited: bool):
         """Marks this room as having been visited by the player."""

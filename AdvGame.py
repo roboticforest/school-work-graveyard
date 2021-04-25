@@ -137,6 +137,9 @@ class AdvGame:
                 continue
 
             # Check for motion verbs.
+
+            # "GO" is mostly implemented for an easter egg, but motion verbs follow it naturally and allowing it covers
+            # more use cases.
             if command == "GO" and len(user_input) > 1:  # Small extension, and an easter egg.
                 if user_input[1] == "DENNIS":  # "... Obvious exits are NORTH, SOUTH, and DENNIS."
                     print("YOU ARE THY DUNGEONMAN!")
@@ -148,8 +151,10 @@ class AdvGame:
                 command = user_input[1]
                 command = resolve_synonym(command)
 
-            neighboring_room_id = cur_room.get_connected_room_name(command)
-            if neighboring_room_id is None:
+            # Attempt to move to a room attached to the given command word.
+            neighboring_rooms = cur_room.get_connected_rooms(command)
+            # If no rooms found, there were no connections using the given word.
+            if len(neighboring_rooms) == 0:
                 # Small extension to project guide.
                 # If the command was a movement verb of some sort, print a more appropriate message.
                 if command in ["NORTH", "SOUTH", "EAST", "WEST", "IN", "OUT", "UP", "DOWN", "FLY", "XYZZY",
@@ -158,12 +163,25 @@ class AdvGame:
                 else:
                     print("I don't know how to apply that word here.")
                 continue
-            elif neighboring_room_id == "EXIT":
-                playing_game = False
-                print("GAME OVER!")
+            # If there was one or more rooms, try to move the player to the first one they meet the requirements for.
             else:
-                cur_room = self.get_room(neighboring_room_id)
-                display_room(cur_room)
+                moving = False
+                destination = ""
+                i = 0
+                while not moving and i < len(neighboring_rooms):
+                    # (exit_command, destination_room, requirement)
+                    _, destination, required_item = neighboring_rooms[i]
+                    if required_item is None or required_item in self._player_inventory:
+                        moving = True
+                    else:
+                        i = i + 1
+
+                if moving:
+                    cur_room = self.get_room(destination)
+                else:
+                    print("You don't have an item that will let you go that way.")
+
+            display_room(cur_room)
 
     def read_objects(self, object_file):
         """
