@@ -165,7 +165,7 @@ class AdvRoom:
         # Read in the list of available room changing verbs and destinations.
         # The list end is marked by a blank line.
         done = False
-        room_exits = {}
+        room_exits = []
         while not done:
             line = room_file.readline().strip()
             if line == "":
@@ -178,6 +178,14 @@ class AdvRoom:
                     raise ValueError(msg)
                 exit_command = line[:split_pos].upper()
                 destination_room = line[split_pos + 1:].strip()
-                room_exits[exit_command] = destination_room
+                requirement = None
+
+                # Handle optional room requirement.
+                split_pos = destination_room.find("/")
+                if split_pos != -1:
+                    requirement = destination_room[split_pos + 1:]
+                    destination_room = destination_room[:split_pos]
+
+                room_exits.append((exit_command, destination_room, requirement))
 
         return AdvRoom(name, short_desc, long_desc, room_exits)
