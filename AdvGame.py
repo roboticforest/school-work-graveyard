@@ -175,6 +175,12 @@ class AdvGame:
 
             # Attempt to move to a room attached to the given command word.
             neighboring_rooms = cur_room.get_connected_rooms(command)
+
+            # Undocumented feature. Not mentioned in the guide (unless I missed it), but can be seen in the data file
+            # SmallRooms.txt in the Darkness room which forces the player into the Pit room if they don't type the right
+            # movement command.
+            neighboring_rooms.extend(cur_room.get_connected_rooms("*"))
+
             # If no rooms found, there were no connections using the given word.
             if len(neighboring_rooms) == 0:
                 # Small extension to project guide.
