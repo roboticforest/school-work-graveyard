@@ -83,6 +83,28 @@ class AdvGame:
         cur_room: AdvRoom = self.get_room("START")
         display_room(cur_room)
         while playing_game:
+
+            # Check if the game should end.
+            if cur_room.get_name() == "EXIT":
+                display_room(cur_room, req_full_desc=True)
+                playing_game = False
+                continue
+
+            # Check for and handle forced movements.
+            mandatory_paths = cur_room.get_connected_rooms("FORCED")
+            if len(mandatory_paths) > 0:
+                for path in mandatory_paths:
+                    _, destination, required_item = path
+                    if required_item is None or required_item in self._player_inventory:
+                        # Rooms that contain FORCED movements are good for displaying messages only as the player can not
+                        # stay in that room or interact with anything there. To ensure the long description always displays
+                        # for such rooms they must be marked as not visited just before leaving since it's impossible in
+                        # this implementation to display a room description without marking the room as visited.
+                        cur_room.set_visited(False)
+                        cur_room = self.get_room(destination)
+                        break
+                continue
+
             # Capture user input and break into tokens using whitespace.
             user_input = []
             while not user_input:
@@ -262,6 +284,7 @@ class AdvGame:
                 if len(rooms) == 0:
                     rooms["START"] = room
                 rooms[name] = room
+        rooms["EXIT"] = AdvRoom("EXIT", "-", ["Game Over."], [])
         return AdvGame(rooms)
 
 
