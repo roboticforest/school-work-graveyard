@@ -47,9 +47,9 @@ def load_adventure_game():
 
     try:
         pass
-        # synonyms_filename = DATA_FILE_PREFIX + "Synonyms.txt"
-        # with open(synonyms_filename, "rt") as names_file:
-        #     the_adventure.read_synonyms(names_file)
+        synonyms_filename = DATA_FILE_PREFIX + "Synonyms.txt"
+        with open(synonyms_filename, "rt") as names_file:
+            the_adventure.read_synonyms(names_file)
     except IOError as err:
         pass  # Missing synonym file is not an error.
 

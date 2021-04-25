@@ -14,6 +14,7 @@ necessary to play a game.
 # into helper methods will be essential.                                  #
 ###########################################################################
 
+import typing
 from AdvObject import AdvObject
 from AdvRoom import AdvRoom
 
@@ -30,6 +31,7 @@ class AdvGame:
         self._rooms = rooms
         self._all_objects = {}
         self._player_inventory = set()
+        self._synonyms = {}
 
     def get_room(self, name: str):
         """Returns the AdvRoom object with the specified name."""
@@ -167,6 +169,48 @@ class AdvGame:
             else:
                 objects[game_object.get_name()] = game_object
         self._all_objects = objects
+
+    def read_synonyms(self, names_file: typing.TextIO):
+        """
+        Loads command synonyms from the given file object into this adventure.
+        The file format is simply a list of name equivalents, one per line, like so:
+
+        N=NORTH
+
+        Q=QUIT
+
+        BOTTLE=WATER
+
+        ... and so on, where the left side is the new name to use, and the right side is some previously defined built-in
+        command or in-game object.
+
+        :param names_file: An open file instance containing the synonym dictionary entries to add to this adventure.
+        :return: Nothing
+        """
+        names = {}
+
+        done = False
+        while not done:
+            # Check for blank lines and EOF.
+            line = names_file.readline()
+            if line == "":  # If at the end of the file.
+                done = True
+            line = line.strip().upper()
+            if line == "":  # If we read a blank line.
+                continue    # read another line.
+
+            # A valid line was read. Start parsing...
+            split_loc = line.find("=")
+
+            # If the line doesn't contain an equal sign, skip it.
+            if split_loc == -1:
+                continue
+
+            synonym = line[:split_loc]
+            original_name = line[split_loc+1:]
+            names[synonym] = original_name
+
+        self._synonyms = names
 
     @staticmethod
     def read_adventure(room_file):
