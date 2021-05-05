@@ -1,5 +1,6 @@
 from pgl import *
 import random
+import math
 
 
 def random_color() -> str:
@@ -100,6 +101,21 @@ def make_centered_oval(center_x: int, center_y: int, width: int, height: int, co
 
 def center_object_at(pgl_shape_obj: GObject, x: int, y: int):
     pgl_shape_obj.set_location(x - pgl_shape_obj.get_width() // 2, y - pgl_shape_obj.get_height() // 2)
+
+
+def make_triangle(height: float) -> GPolygon:
+
+    def get_tri_edge_length(tri_height: float):
+        return 2 * ((tri_height * math.sqrt(3)) / 3)
+
+    edge_length = get_tri_edge_length(height)
+
+    tri = GPolygon()
+    tri.add_vertex(0, -(height / 2))
+    tri.add_polar_edge(edge_length, 240)
+    tri.add_polar_edge(edge_length, 0.0)
+
+    return tri
 
 
 # Main program.
