@@ -1,0 +1,32 @@
+# All good points. Whitespace shouldn't be a big deal.
+# There are 10 valid points that will be read from this file.
+50, 50
+ 128, 96
+75,75   # Valid line comment.
+18,27
+39,     66
+   94,     72
+85, 34
+
+# Some empty lines. Should all be skipped without issue.
+
+
+        11,      12
+
+
+52,34
+43, 67
+
+# All of the following are errors and should be ignored (and logged).
+8364  # Just one int.
+abc  # Not a number.
+zxy, 123   # Good comma usage, but not a number.
+123.4, 897.56   # Floating point values aren't parsed.
+999,888,777         # Too many numbers.
+789,789,987,987  # Also too many numbers.
+
+# Duplicate points should be skipped.
+11,12
+50, 50
+
+
