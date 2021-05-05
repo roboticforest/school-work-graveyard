@@ -1,3 +1,5 @@
+import math
+
 from pgl import *
 from pgl_utils import *
 from button import GButton
@@ -27,23 +29,22 @@ class GameSettings:
 
 
 class GameObject:
-    def __init__(self, parent_window: GWindow):
-        self._id = 0
-        self._x = WINDOW_WIDTH // 2
-        self._y = WINDOW_HEIGHT // 2
-        self._x_vel = 1.0
-        self._y_vel = 1.0
+    def __init__(self, parent_window: GWindow, start_x, start_y, init_x_vel, init_y_vel):
+        self._x = start_x
+        self._y = start_y
+        self._x_vel = init_x_vel
+        self._y_vel = init_y_vel
         self._shape = None
         self._parent_win = parent_window
 
     def x(self, new_x_pos=None):
         if new_x_pos is not None:
-            self._x = int(new_x_pos)
+            self._x = float(new_x_pos)
         return self._x
 
     def y(self, new_y_pos=None):
-        if new_y_pos is not None:  # Simply stating "if new_y_pos:" fails. A tricky to find bug.
-            self._y = int(new_y_pos)
+        if new_y_pos is not None:  # Simply stating "if new_y_pos:" fails when dealing with numbers. A tricky to find bug.
+            self._y = float(new_y_pos)
         return self._y
 
     def x_velocity(self, new_x_vel=None):
@@ -67,10 +68,16 @@ class GameObject:
         pass
 
 
-class BallTarget(GameObject):
-    def __init__(self, parent_window: GWindow):
-        GameObject.__init__(self, parent_window)
-        self.visible_shape(make_centered_circle(self.x(), self.y(), 25, "red", "black", 3))
+class BouncingTarget(GameObject):
+    def __init__(self, parent_window: GWindow, speed, color, size):
+        GameObject.__init__(self, parent_window, random.randint(0 + size, WINDOW_WIDTH - size),
+                            random.randint(0 + size, WINDOW_HEIGHT - size), 0, 0)
+        self.visible_shape(make_centered_circle(self.x(), self.y(), size, color, "black", 3))
+        split_percent = random.random()
+        x_dir = random.choice([1.0, -1.0])
+        y_dir = random.choice([1.0, -1.0])
+        self.x_velocity(speed * split_percent * x_dir)
+        self.y_velocity(speed * (1 - split_percent) * y_dir)
 
     def update(self):
         self.x(self.x() + self.x_velocity())
@@ -101,10 +108,10 @@ class BallTarget(GameObject):
         center_object_at(self.visible_shape(), self.x(), self.y())
 
 
-class SquareTarget(GameObject):
-    def __init__(self, parent_window: GWindow):
-        GameObject.__init__(self, parent_window)
-        self.visible_shape(make_centered_square(self.x(), self.y(), 60, "green", "yellow"))
+class SlidingTarget(GameObject):
+    def __init__(self, parent_window: GWindow, speed, color, size):
+        GameObject.__init__(self, parent_window, random.randint(0, WINDOW_WIDTH), -size, 0, speed)
+        self.visible_shape(make_centered_square(self.x(), self.y(), size, color, "black", 3))
         self.y(-self.visible_shape().get_height())
 
     def update(self):
@@ -118,36 +125,26 @@ class SquareTarget(GameObject):
         center_object_at(self.visible_shape(), self.x(), self.y())
 
 
-class TriangleTarget(GameObject):
-    def __init__(self, parent_window: GWindow):
-        GameObject.__init__(self, parent_window)
-        self.visible_shape(make_triangle(60))
-        set_object_color(self.visible_shape(), "blue", "black", 3)
-
-        # This GPoly doesn't work right with center_object_at().
-        self.visible_shape().set_location(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
-
-    def update(self):
-        pass
-
-
 def clicker_game():
     main_window = GWindow(WINDOW_WIDTH, WINDOW_HEIGHT)
 
-    # def update_objects():
-    #     if game_state.game_over:
-    #         return
+    def load_game_objects():
+        game_objects.append(SlidingTarget(main_window, 1, "blue", 25))
+        game_objects.append(SlidingTarget(main_window, 3, "yellow", 25))
+        game_objects.append(BouncingTarget(main_window, 1, "blue", 25))
+        game_objects.append(BouncingTarget(main_window, 3, "red", 25))
 
     def update_game():
         if game_state.is_playing:
-            game_state.ball.update()
-            game_state.square.update()
+            for obj in game_objects:
+                obj.update()
 
     def start_button_action():
         # Surrounding if needed to prevent the button from continuing to work after removal from the screen.
         if not game_state.is_playing:
             game_state.is_playing = True
             main_window.remove(start_button)
+            load_game_objects()
             main_window.set_interval(update_game, 10)
 
     background = GRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -158,9 +155,7 @@ def clicker_game():
     game_state.is_playing = False
     game_state.game_over = False
 
-    game_state.ball = BallTarget(main_window)
-    game_state.square = SquareTarget(main_window)
-    game_state.triangle = TriangleTarget(main_window)
+    game_objects = []
 
     start_button = GButton("Start Game", start_button_action)
     center_object_at(start_button, WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
