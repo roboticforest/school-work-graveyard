@@ -52,7 +52,7 @@ class GameSettings:
 
                     # Line should be in valid form. Attempt to parse settings.
                     setting_name = line[:split_pos].strip().upper()
-                    setting_value = line[split_pos+1:].strip()
+                    setting_value = line[split_pos + 1:].strip()
                     try:
                         if setting_name == "MISSES_ALLOWED":
                             setting_value = int(setting_value)
@@ -80,7 +80,19 @@ class GameSettings:
 
 
 class GameObject:
+    """
+    Abstract base class (if that term even applies in Python) for all the floating shapes that will move around the screen.
+
+    This class is essentially a wrapper around the GFillableObject class, expanding its abilities for the purposes of this
+    'click on the shape' game.
+    """
+
     def __init__(self, parent_window: GWindow, name, start_x, start_y, init_x_vel, init_y_vel):
+        """
+        Initialized the GameObject with basic data about its position and direction of motion.
+        GameObjects add themselves to a parent window.
+        """
+
         self._name = name
         self._x = start_x
         self._y = start_y
@@ -90,29 +102,45 @@ class GameObject:
         self._parent_win = parent_window
 
     def name(self):
+        """
+        Get the name of the object. This is read only and names can only be set during object creation.
+
+        Names must be unique and match those found in the object descriptions dictionary used to make GameObjects.
+        """
         return self._name
 
     def x(self, new_x_pos=None):
+        """Combination getter/setter for the x-axis position of the object."""
         if new_x_pos is not None:
             self._x = float(new_x_pos)
         return self._x
 
     def y(self, new_y_pos=None):
+        """Combination getter/setter for the y-axis position of the object."""
         if new_y_pos is not None:  # Simply stating "if new_y_pos:" fails when dealing with numbers. A tricky to find bug.
             self._y = float(new_y_pos)
         return self._y
 
     def x_velocity(self, new_x_vel=None):
+        """Combination getter/setter for the x-axis velocity of the object."""
         if new_x_vel is not None:
             self._x_vel = float(new_x_vel)
         return self._x_vel
 
     def y_velocity(self, new_y_vel=None):
+        """Combination getter/setter for the y-axis velocity of the object."""
         if new_y_vel is not None:
             self._y_vel = float(new_y_vel)
         return self._y_vel
 
     def visible_shape(self, shape: GFillableObject = None):
+        """
+        Combination getter/setter for defining the actual shape that will be visible to the player within the main window.
+
+        Base GameObjects do not initially create a shape or draw anything to the screen. It is up to implementations of
+        classes derived from GameObject to create and manipulate their particular shape objects and then to use this function
+        to add those shapes to the window.
+        """
         if shape is not None:
             self._parent_win.remove(self._shape)
             self._shape = shape
@@ -121,14 +149,32 @@ class GameObject:
         return self._shape
 
     def update(self):
+        """For derived classes to use to create custom behavior. Base GameObjects don't do anything."""
         pass
 
 
 class BouncingTarget(GameObject):
+    """A bouncing ball object that flies around the screen bouncing off of each wall."""
+
     def __init__(self, parent_window: GWindow, name, speed, color, size):
+        """
+        Initializes the ball.
+
+        :param parent_window: The window the ball should add itself to.
+        :param name: The unique ID of this ball.
+        :param speed: The distance (in pixels) the ball will travel each update.
+        :param color: A string specifying the color of the ball.
+        :param size: The radius of the ball.
+        """
+
+        # Initialize the parent object.
         GameObject.__init__(self, parent_window, name, random.randint(0 + size, WINDOW_WIDTH - size),
                             random.randint(0 + size, WINDOW_HEIGHT - size), 0, 0)
+
+        # Define our shape.
         self.visible_shape(make_centered_circle(self.x(), self.y(), size, color, "black", 3))
+
+        # Split the given speed into separate x,y velocities. Randomize the direction for variety.
         split_percent = random.random()
         x_dir = random.choice([1.0, -1.0])
         y_dir = random.choice([1.0, -1.0])
@@ -136,10 +182,13 @@ class BouncingTarget(GameObject):
         self.y_velocity(speed * (1 - split_percent) * y_dir)
 
     def update(self):
+        """Move the ball around the screen, bouncing off of the edges. Like the ball in pong or breakout."""
+
+        # Move the ball.
         self.x(self.x() + self.x_velocity())
         self.y(self.y() + self.y_velocity())
 
-        # Bounds check against the window borders.
+        # Bounds check the motion against the window borders, reversing the appropriate velocities when needed.
 
         # Right wall check
         if self.x() + self.visible_shape().get_width() // 2 > WINDOW_WIDTH:
@@ -161,33 +210,76 @@ class BouncingTarget(GameObject):
             self.y(WINDOW_HEIGHT - self.visible_shape().get_height() // 2)
             self.y_velocity(-self.y_velocity())
 
+        # Finally, move the visible shape to match the position of this object.
         center_object_at(self.visible_shape(), self.x(), self.y())
 
 
 class SlidingTarget(GameObject):
+    """A block which slides across the screen."""
+
     def __init__(self, parent_window: GWindow, name, speed, color, size):
+        """
+        Initializes the block.
+
+        :param parent_window: The window the block should add itself to.
+        :param name: The unique ID of this block.
+        :param speed: The distance (in pixels) the block will travel each update.
+        :param color: A string specifying the color of the block.
+        :param size: The width/height of the square block.
+        """
+
+        # Initialize the parent object.
         GameObject.__init__(self, parent_window, name, random.randint(0, WINDOW_WIDTH), -size, 0, speed)
+
+        # Create the visible shape the player will see.
         self.visible_shape(make_centered_square(self.x(), self.y(), size, color, "black", 3))
+
+        # Set the initial position of the block off the top of the screen.
         self.y(-self.visible_shape().get_height())
 
     def update(self):
+        """Slide the block down the screen."""
+
+        # FUTURE MOVEMENT
+        # Slide the block across the screen from side to side, or from bottom to top.
+
+        # Move the block.
         self.y(self.y() + self.y_velocity())
 
+        # Bounds check,
+        # if the block moves off the bottom of the screen, reset it to a random position above the screen.
         if self.y() - self.visible_shape().get_height() // 2 > WINDOW_HEIGHT:
             self.x(
                 random.randint(self.visible_shape().get_width() // 2, WINDOW_WIDTH - self.visible_shape().get_width() // 2))
             self.y(-self.visible_shape().get_height() // 2)
 
+        # Move the visible GObject to match the final position of this block object.
         center_object_at(self.visible_shape(), self.x(), self.y())
 
 
 def clicker_game():
+    """
+    A simple game where you gave to click on the shapes to remove them from the screen.
+
+    Apparently, it's similar to a phone app called Ant Squisher... I didn't know this was a thing.
+    """
+
+    # Create the main window.
     main_window = GWindow(WINDOW_WIDTH, WINDOW_HEIGHT)
 
+    # Define helper functions needed by this game.
+    # They're defined here instead of at file scope due to their specificity and use of the main_window.
+
     def load_game_objects(level: int = 1) -> bool:
+        """Load all game object descriptions and create specific instances for the given level."""
+
         # Prep for loading the given level.
+        # Clear any game object instances that may have existed from a previous level.
         game_objects.clear()
 
+        # TEMP CODE
+        # Pretend to load a bunch of descriptions from a file.
+        # Use those descriptions to instantiate a few objects for a couple of levels.
         if level == 1:
             # Pretend we're doing this from a file.
             # (kind, speed, color, size, points)
@@ -214,10 +306,17 @@ def clicker_game():
         return False  # No more levels to load.
 
     def update_game():
+        """Updates all game objects and controls global game flow."""
+
+        # Do nothing if the game is not running.
         if game_state.is_playing:
+
+            # If the current level is complete,
             if game_state.level_complete:
+                # try to advance to the next level.
                 game_state.current_level = game_state.current_level + 1
 
+                # If there is a next level, play it, otherwise the player must have won.
                 if load_game_objects(game_state.current_level):
                     game_state.level_complete = False
                     game_state.hits = 0
@@ -228,6 +327,7 @@ def clicker_game():
                                     WINDOW_HEIGHT // 2 - game_over_label.get_height() // 2)
                 return
 
+            # If the player lost, end the game.
             if game_state.game_over:
                 game_state.is_playing = False
                 game_over_label = GLabel("Game Over")
@@ -235,28 +335,50 @@ def clicker_game():
                                 WINDOW_HEIGHT // 2 - game_over_label.get_height() // 2)
                 return
 
+            # If the game isn't ending for some reason, then keep playing.
+            # Tell each game object to continue moving around the screen.
             for obj in game_objects:
                 obj.update()
 
     def start_button_action():
-        # Surrounding if needed to prevent the button from continuing to work after removal from the screen.
+        """Removes the start button from the screen and begins the game."""
+
+        # Surrounding if statement is needed here to prevent the button from continuing to function
+        # after being removed from the screen. The now invisible button re-adds labels and callback
+        # functions if it gets clicked again, causing objects to speed up.
         if not game_state.is_playing:
-            game_state.is_playing = True
-            main_window.remove(start_button)
-            load_game_objects()
+            game_state.is_playing = True  # Start the game.
+            main_window.remove(start_button)  # Remove the start button.
+            load_game_objects()  # Load every object the player will attack with their mouse.
+
+            # Setup the misses label.
             game_state.misses_remaining = game_settings.misses_allowed()
             miss_label.set_label("Remaining Attempts: " + str(game_state.misses_remaining))
             main_window.add(miss_label, 10, miss_label.get_height())
+
+            # Setup the player score label.
             main_window.add(score_label, WINDOW_WIDTH - score_label.get_width() - 10, score_label.get_height())
+
+            # Start the game's update loop.
             main_window.set_interval(update_game, 10)
 
     def click_action(event: GMouseEvent):
+        """Respond to the player's mouse clicks."""
+
+        # If the game isn't running, do nothing.
         if game_state.is_playing:
+
+            # Get the GObject the player clicked on.
             shape_obj = main_window.get_element_at(event.get_x(), event.get_y())
+
+            # If GameObject forced it to have a name attribute, then it's a target
+            # for the player to click on, otherwise it's something else like a background
+            # element or part of the UI.
             if getattr(shape_obj, "object_name", None) is not None:
                 game_state.hits = game_state.hits + 1
                 main_window.remove(shape_obj)
 
+                # Look up how many points this object is worth and apply that to the player's score.
                 _, _, _, _, score = object_descriptions[shape_obj.object_name]
                 game_state.player_score = game_state.player_score + score
                 score_label.set_label(str(game_state.player_score))
@@ -264,10 +386,15 @@ def clicker_game():
             else:
                 game_state.misses_remaining = game_state.misses_remaining - 1
                 miss_label.set_label("Remaining Attempts: " + str(game_state.misses_remaining))
-            if game_state.misses_remaining <= 0:
+
+            # Check to see if the level should end.
+            if game_state.misses_remaining <= 0:  # Check for Game Over!
                 game_state.game_over = True
-            if game_state.hits == len(game_objects):
+            if game_state.hits == len(game_objects):  # Check for Level Complete!
                 game_state.level_complete = True
+
+    # Now that helper functions are all defined...
+    # Define game variables and default values.
 
     # Setup the background.
     background = GRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -299,9 +426,10 @@ def clicker_game():
     center_object_at(start_button, WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
     main_window.add(start_button)
 
+    # Setup event listeners.
     main_window.add_event_listener("mousedown", click_action)
 
-    # Open the now fully set up window and start the game.
+    # Lastly, open the now fully set up window and start the game.
     main_window.event_loop()
 
 
