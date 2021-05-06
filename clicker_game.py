@@ -12,8 +12,59 @@ WINDOW_HEIGHT = 768
 
 
 class GameSettings:
+    """
+    A class for storing the global settings of this particular game.
+
+    Every setting has a default value in case one isn't supplied in a settings
+    file, and all settings can be changed at any time.
+    """
+
     def __init__(self):
+        """Initializes the game settings with default values."""
         self._misses_allowed = 10
+
+    def load_settings(self, filename):
+        """
+        Attempts to load all known settings from a file. If any setting is not
+        found, or if the setting could not be parsed properly, then the default
+        value is used.
+
+        Each setting should be listed on its own line as a simple key=value pairing.
+
+        :param filename: The name of the file that the settings can be found in.
+        :return: Nothing.
+        """
+
+        try:
+            with open(filename, "rt") as settings_file:
+                for line in settings_file.readlines():
+
+                    # Support python-style line comments.
+                    # This needs to happen before blank line filtering.
+                    comment_pos = line.find("#")
+                    if comment_pos != -1:
+                        line = line[:comment_pos]
+
+                    # Validate lines and check for blanks.
+                    split_pos = line.find("=")
+                    if line.strip() == "" or split_pos == -1:
+                        continue  # Skip blank or invalid lines.
+
+                    # Line should be in valid form. Attempt to parse settings.
+                    setting_name = line[:split_pos].strip().upper()
+                    setting_value = line[split_pos+1:].strip()
+                    try:
+                        if setting_name == "MISSES_ALLOWED":
+                            setting_value = int(setting_value)
+                            self._misses_allowed = setting_value
+                        # FUTURE SETTINGS GO HERE
+                        # Level complete awards
+                        # Increase amount for misses
+                        # Bonus points for finishing a level.
+                    except ValueError:
+                        continue
+        except FileNotFoundError:
+            return
 
     # Combination getter/setter function.
     def misses_allowed(self, new_miss_max=None):
@@ -21,7 +72,7 @@ class GameSettings:
         Getter/setter for how many times a player can miss each round.
 
         :param new_miss_max: An integer that (if supplied) sets how many times a player can miss before losing.
-        :return: The current setting for how many missed clicks a player can make.
+        :return: The current (or newly set) missed clicks setting.
         """
         if new_miss_max is not None:
             self._misses_allowed = int(new_miss_max)
@@ -225,6 +276,7 @@ def clicker_game():
 
     # Load game settings.
     game_settings = GameSettings()
+    game_settings.load_settings("settings.conf")
 
     # Setup game state data.
     game_state = GState()
