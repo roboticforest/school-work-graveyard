@@ -53,6 +53,15 @@ def ordinal_str(num: int) -> str:
         return sign + base_num[:-2] + two_digit_ordinal(base_num[-2:])
 
 
+def remove_line_comment(line: str) -> str:
+    """Finds and erases Python style line comments, stripping any leading/trailing whitespace."""
+    split_pos = line.find("#")
+    if split_pos != -1:
+        clean_line = line[:split_pos]
+    else:
+        clean_line = line
+    return clean_line.strip()
+
 # Main program.
 if __name__ == "__main__":
     print("Testing utilities...")
