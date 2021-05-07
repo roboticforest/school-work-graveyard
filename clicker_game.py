@@ -1,11 +1,11 @@
-import math
-import os
 
 from pgl import *
 from pgl_utils import *
 from button import GButton
 import text_utils as txt
 import random
+import math
+import os
 
 # GWindows can't be resized programmatically, nor does GWindow.get_width() ever return anything other than the window's
 # initial value even if the user resizes the window.
@@ -102,6 +102,12 @@ class GameObject:
         self._y_vel = init_y_vel
         self._shape = None
         self._parent_win = parent_window
+
+    def __repr__(self):
+        """Creates a string representation of the object. Very nice for reading in a debugger."""
+        return "GameObject(name:\"{}\", pos({},{}), vel({},{}))".format(self._name,
+                                                                        self._x, self._y,
+                                                                        self._x_vel, self._y_vel)
 
     def name(self):
         """
@@ -268,6 +274,7 @@ def clicker_game():
 
     # Create the main window.
     main_window = GWindow(WINDOW_WIDTH, WINDOW_HEIGHT)
+    error_log = open("errors.log", "wt")
 
     # Define helper functions needed by this game.
     # They're defined here instead of at file scope due to their specificity and use of the main_window.
@@ -500,24 +507,26 @@ def clicker_game():
                                     try:
                                         if key == "NAME": name = value
                                         elif key == "KIND": kind = value.upper()
-                                        elif key == "COLOR": color = value  # TODO: This needs validation.
+                                        elif key == "COLOR": color = value.upper()
                                         elif key == "SIZE": size = int(value)
                                         elif key == "SPEED": speed = int(value)
                                         elif key == "POINTS": points = int(value)
                                         else:
-                                            print("Unknown object property {} on line {}.".format(key, line_num))
+                                            error_log.write("Unknown object property {} on line {}.\n".format(key, line_num))
                                     except SyntaxError or ValueError:
-                                        print("The value \"{}\" on line {} could not be interpreted.".format(value,
+                                        error_log.write(
+                                            "The value \"{}\" on line {} could not be interpreted.\n".format(value,
                                                                                                              line_num))
                             # Attempt to save any read object data.
                             # If anything is invalid, skip the object.
                             if name == "" or kind == "":
-                                print("The object described at or before line", line_num,
-                                      "is invalid. The properties NAME and KIND are not optional.")
-                                print("NAME must be a unique identifier.")
-                                print("Kind must be any one of:")
-                                print("BOUNCER")
-                                print("SLIDER")
+                                error_log.write("The object described at or before line ")
+                                error_log.write(str(line_num))
+                                error_log.write(" is invalid. The properties NAME and KIND are not optional.\n")
+                                error_log.write("NAME must be a unique identifier.\n")
+                                error_log.write("Kind must be any one of:\n")
+                                error_log.write("BOUNCER\n")
+                                error_log.write("SLIDER\n")
                                 continue
                             else:
                                 # Save everything, accepting some default values of nothing was read from the file.
@@ -548,7 +557,8 @@ def clicker_game():
                                         obj_name = line[split_pos + 1:].strip()
                                         object_count_list.append((count, obj_name))
                                     except SyntaxError or ValueError:
-                                        print("The value \"{}\" on line {} could not be interpreted.".format(count,
+                                        error_log.write(
+                                            "The value \"{}\" on line {} could not be interpreted.\n".format(count,
                                                                                                              line_num))
                             game_levels.append(object_count_list)
                     else:
@@ -557,7 +567,7 @@ def clicker_game():
                         continue
 
         except FileNotFoundError:
-            print("Game data could not be loaded.")
+            error_log.write("Game data could not be loaded.\n")
             return
 
     # Now that helper functions are all defined...
@@ -602,6 +612,9 @@ def clicker_game():
 
     # Lastly, open the now fully set up window and start the game.
     main_window.event_loop()
+
+    # Close out the error log when the game shuts down.
+    error_log.close()
 
 
 # Main program.
