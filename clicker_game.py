@@ -1,8 +1,10 @@
 import math
+import os
 
 from pgl import *
 from pgl_utils import *
 from button import GButton
+import text_utils as txt
 import random
 
 # GWindows can't be resized programmatically, nor does GWindow.get_width() ever return anything other than the window's
@@ -270,38 +272,50 @@ def clicker_game():
     # Define helper functions needed by this game.
     # They're defined here instead of at file scope due to their specificity and use of the main_window.
 
-    def load_game_objects(level: int = 1) -> bool:
+    def load_next_level(level: int = 0) -> bool:
         """Load all game object descriptions and create specific instances for the given level."""
 
         # Prep for loading the given level.
         # Clear any game object instances that may have existed from a previous level.
-        game_objects.clear()
+        game_objects_in_play.clear()
+
+        if level < len(game_levels):
+            object_count_list = game_levels[level]
+            for obj_count in object_count_list:
+                count, obj_name = obj_count
+                kind, color, size, speed, points = game_object_descriptions[obj_name]
+                for i in range(count):
+                    if kind == "SLIDER":
+                        game_objects_in_play.append(SlidingTarget(main_window, obj_name, speed, color, size))
+                    elif kind == "BOUNCER":
+                        game_objects_in_play.append(BouncingTarget(main_window, obj_name, speed, color, size))
+            return True
 
         # TEMP CODE
         # Pretend to load a bunch of descriptions from a file.
         # Use those descriptions to instantiate a few objects for a couple of levels.
-        if level == 1:
-            # Pretend we're doing this from a file.
-            # (kind, speed, color, size, points)
-            object_descriptions["blue block"] = ("slider", 1, "blue", 25, 10)
-            object_descriptions["yellow block"] = ("slider", 3, "yellow", 25, 30)
-            object_descriptions["blue roller"] = ("bouncer", 1, "blue", 25, 5)
-            object_descriptions["red ball"] = ("bouncer", 3, "red", 25, 10)
-            object_descriptions["lava drip"] = ("slider", 2, "red", 40, 10)
-
-            for obj_name in object_descriptions:
-                kind, speed, color, size, _ = object_descriptions[obj_name]
-                if kind == "bouncer":
-                    game_objects.append(BouncingTarget(main_window, obj_name, speed, color, size))
-                if kind == "slider":
-                    game_objects.append(SlidingTarget(main_window, obj_name, speed, color, size))
-
-            _, speed, color, size, _ = object_descriptions["blue roller"]
-            return True
-        if level == 2:
-            for i in range(3):
-                game_objects.append(SlidingTarget(main_window, "lava drip", 2, "red", 40))
-            return True
+        # if level == 1:
+        #     # Pretend we're doing this from a file.
+        #     # (kind, color, size, speed, points)
+        #     game_object_descriptions["blue block"] = ("slider", "blue", 25, 1, 10)
+        #     game_object_descriptions["yellow block"] = ("slider", "yellow", 25, 3, 30)
+        #     game_object_descriptions["blue roller"] = ("bouncer", "blue", 1, 25, 5)
+        #     game_object_descriptions["red ball"] = ("bouncer", "red", 3, 25, 10)
+        #     game_object_descriptions["lava drip"] = ("slider", "red", 2, 40, 10)
+        #
+        #     for obj_name in game_object_descriptions:
+        #         kind, color, size, speed, _ = game_object_descriptions[obj_name]
+        #         if kind == "bouncer":
+        #             game_objects_in_play.append(BouncingTarget(main_window, obj_name, speed, color, size))
+        #         if kind == "slider":
+        #             game_objects_in_play.append(SlidingTarget(main_window, obj_name, speed, color, size))
+        #
+        #     _, color, size, speed, _ = game_object_descriptions["blue roller"]
+        #     return True
+        # if level == 2:
+        #     for i in range(3):
+        #         game_objects_in_play.append(SlidingTarget(main_window, "lava drip", 2, "red", 40))
+        #     return True
 
         return False  # No more levels to load.
 
@@ -317,7 +331,7 @@ def clicker_game():
                 game_state.current_level = game_state.current_level + 1
 
                 # If there is a next level, play it, otherwise the player must have won.
-                if load_game_objects(game_state.current_level):
+                if load_next_level(game_state.current_level):
                     game_state.level_complete = False
                     game_state.hits = 0
                 else:
@@ -337,7 +351,7 @@ def clicker_game():
 
             # If the game isn't ending for some reason, then keep playing.
             # Tell each game object to continue moving around the screen.
-            for obj in game_objects:
+            for obj in game_objects_in_play:
                 obj.update()
 
     def start_button_action():
@@ -349,7 +363,7 @@ def clicker_game():
         if not game_state.is_playing:
             game_state.is_playing = True  # Start the game.
             main_window.remove(start_button)  # Remove the start button.
-            load_game_objects()  # Load every object the player will attack with their mouse.
+            load_next_level()  # Load every object the player will attack with their mouse.
 
             # Setup the misses label.
             game_state.misses_remaining = game_settings.misses_allowed()
@@ -379,7 +393,7 @@ def clicker_game():
                 main_window.remove(shape_obj)
 
                 # Look up how many points this object is worth and apply that to the player's score.
-                _, _, _, _, score = object_descriptions[shape_obj.object_name]
+                _, _, _, _, score = game_object_descriptions[shape_obj.object_name]
                 game_state.player_score = game_state.player_score + score
                 score_label.set_label(str(game_state.player_score))
                 score_label.set_location(WINDOW_WIDTH - score_label.get_width() - 10, score_label.get_height())
@@ -390,8 +404,161 @@ def clicker_game():
             # Check to see if the level should end.
             if game_state.misses_remaining <= 0:  # Check for Game Over!
                 game_state.game_over = True
-            if game_state.hits == len(game_objects):  # Check for Level Complete!
+            if game_state.hits == len(game_objects_in_play):  # Check for Level Complete!
                 game_state.level_complete = True
+
+    def load_game_from_file():
+        try:
+            with open("game.data") as game_data_file:
+                def get_next_line():
+                    """Tiny helper to ensure line number counting always happens."""
+                    nonlocal line_num
+                    next_line = game_data_file.readline()  # Returns empty str at EOF.
+                    line_num = line_num + 1
+                    return next_line
+
+                def go_back_one_line():
+                    """Tiny helper function to go backwards one line in a UTF-8 safe manner."""
+                    # Please forgive this one exception to the rule about writing our own code. I was 99% done
+                    # with this project and getting an exception about how relative seeks were not possible
+                    # which made no sense because why would Python offer a relative file seek operation and not
+                    # allow you to use it!?!? I eventually found a solution on Stack Overflow.
+                    # Stack Overflow answer: https://stackoverflow.com/a/60416207/9006830
+                    # I was doing the following:
+                    #   game_data_file.seek(-len(raw_line), 1)  # Relative seek backwards to previous line.
+                    # That only works if I was using Python 2. Since Python 3 is UTF-8 compliant that
+                    # code now throws an exception. I could open the text file in binary mode, but that means
+                    # I'm only forcing Python to do something stupid.
+                    # I assumed that I could seek() backwards by *characters*, but I can't, seek() goes back
+                    # bytes... Which, honestly isn't very surprising. I should have guessed that. Since UTF-8
+                    # characters can be multibyte then I could land in the middle of a single character if it
+                    # was an emoji or something. This code I copied and modified takes advantage of landing in
+                    # the middle of a character to know if it's at the start of a UTF-8 character or not. It
+                    # lands on a byte of a character and attempts to read(). If read() throws an exception
+                    # then we need to move backwards one more byte. This keeps going until it reads a newline
+                    # character and we know where at the end of the previous line.
+                    # My modifications to the code are to start out reading backwards 2 characters because this
+                    # function only ever gets called at the end of a line and would pointlessly return immediately
+                    # which causes a crash elsewhere, and of course to using a file variable called game_data_file
+                    # instead of f.
+                    pos = game_data_file.tell() - 2
+                    if pos < 0:
+                        pos = 0
+                    game_data_file.seek(pos, os.SEEK_SET)
+                    while pos > 0:
+                        try:
+                            character = game_data_file.read(1)
+                            if character == '\n':
+                                break
+                        except UnicodeDecodeError:
+                            pass
+                        pos = pos - 1
+                        game_data_file.seek(pos, os.SEEK_SET)
+
+                line_num = 0
+                line = "Start"
+                while line != "":
+                    line = get_next_line()
+
+                    # Support python-style line comments and skipping of blank lines.
+                    # This needs to happen before blank line filtering.
+                    if txt.remove_line_comment(line) == "":
+                        continue
+
+                    tokens = line.upper().split()  # split also strips whitespace.
+                    if tokens[0] == "NEW" and len(tokens) == 2:
+                        if tokens[1] == "OBJECT":  # Begin processing of object data.
+                            # Prep for new object. Data fields read in from multiple lines.
+                            # Strings: name, kind, color
+                            # Numbers: speed, size, points
+                            name = ""
+                            kind = ""
+                            color = "gray"
+                            size = 10
+                            speed = 1
+                            points = 1
+                            done = False
+                            while not done:
+                                raw_line = get_next_line()
+                                if raw_line == "":  # EOF if readline() returns an empty immediately.
+                                    done = True
+                                line = txt.remove_line_comment(raw_line)
+                                if line == "":  # Skip empty lines.
+                                    continue
+
+                                split_pos = line.find("=")
+                                if split_pos == -1:
+                                    # We must be on a line for something new (or an error).
+                                    # Put the file read head back and re-examine this line from outside
+                                    # of the Parse Object section.
+                                    done = True
+                                    go_back_one_line()
+                                    line_num = line_num - 1
+                                else:
+                                    key = line[:split_pos].strip().upper()
+                                    value = line[split_pos + 1:].strip()
+                                    try:
+                                        if key == "NAME": name = value
+                                        elif key == "KIND": kind = value.upper()
+                                        elif key == "COLOR": color = value  # TODO: This needs validation.
+                                        elif key == "SIZE": size = int(value)
+                                        elif key == "SPEED": speed = int(value)
+                                        elif key == "POINTS": points = int(value)
+                                        else:
+                                            print("Unknown object property {} on line {}.".format(key, line_num))
+                                    except SyntaxError or ValueError:
+                                        print("The value \"{}\" on line {} could not be interpreted.".format(value,
+                                                                                                             line_num))
+                            # Attempt to save any read object data.
+                            # If anything is invalid, skip the object.
+                            if name == "" or kind == "":
+                                print("The object described at or before line", line_num,
+                                      "is invalid. The properties NAME and KIND are not optional.")
+                                print("NAME must be a unique identifier.")
+                                print("Kind must be any one of:")
+                                print("BOUNCER")
+                                print("SLIDER")
+                                continue
+                            else:
+                                # Save everything, accepting some default values of nothing was read from the file.
+                                game_object_descriptions[name] = (kind, color, size, speed, points)
+
+                        elif tokens[1] == "LEVEL":
+                            object_count_list = []
+                            done = False
+                            while not done:
+                                raw_line = get_next_line()
+                                if raw_line == "":  # EOF if readline() returns an empty immediately.
+                                    done = True
+                                line = txt.remove_line_comment(raw_line)
+                                if line == "":  # Skip empty lines.
+                                    continue
+
+                                split_pos = line.find(",")
+                                if split_pos == -1:
+                                    # We must be on a line for something new (or an error).
+                                    # Put the file read head back and re-examine this line from outside
+                                    # of the Parse Object section.
+                                    done = True
+                                    go_back_one_line()
+                                    line_num = line_num - 1
+                                else:
+                                    try:
+                                        count = int(line[:split_pos])
+                                        obj_name = line[split_pos + 1:].strip()
+                                        object_count_list.append((count, obj_name))
+                                    except SyntaxError or ValueError:
+                                        print("The value \"{}\" on line {} could not be interpreted.".format(count,
+                                                                                                             line_num))
+                            game_levels.append(object_count_list)
+                    else:
+                        # Skip any unrecognized section headers.
+                        # Only NEW OBJECT or NEW LEVEL are recognized.
+                        continue
+
+        except FileNotFoundError:
+            print("Game data could not be loaded.")
+            return
 
     # Now that helper functions are all defined...
     # Define game variables and default values.
@@ -413,13 +580,17 @@ def clicker_game():
     game_state.misses_remaining = 0
     game_state.player_score = 0
     game_state.hits = 0
-    game_state.current_level = 1
+    game_state.current_level = 0
     miss_label = GLabel("Remaining Attempts: ")
     score_label = GLabel("0")
 
     # Setup a place to store game objects.
-    object_descriptions = {}
-    game_objects = []
+    game_object_descriptions = {}
+    game_objects_in_play = []
+
+    # Setup a place to store game levels.
+    game_levels = []
+    load_game_from_file()
 
     # Setup the game's start button.
     start_button = GButton("Start Game", start_button_action)
