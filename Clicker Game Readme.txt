@@ -38,7 +38,7 @@ To be a simple game where you click on moving shapes to earn points. If you miss
 
 DONE.
 
-Lines 527, 589, and 592.
+Lines 536, 599, and 602.
 
 I'm not sure if you wanted a hardcoded list or not. I manage many lists in this program, and all are filled with valid elements, but none are hardcoded.
 
@@ -48,11 +48,11 @@ DONE - mostly.
 
 I can't recall anywhere where I concatenate any lists/strings, however, I do build tuples. Maybe it's a bit of a stretch, but they are technically an iterable type that's being concatenated together from a number of variables. :-D
 
-As for removing elements, I do clear() a list on line 280 and remove characters from strings via slicing on lines 56, 57, 498, 499, 547, and 548.
+As for removing elements, I do clear() a list on line 287 and remove characters from strings via slicing on lines 56, 57, 505, 506, 556, and 557.
 
-I index on lines 469, 470, and 526 (and probably more).
+I index on lines 476, 477, and 535 (and probably more).
 
-I loop through lists on lines 284, 354, and others. I also have a HUGE chunk of code I commented out, but didn't delete where I looped through a list on line 306.
+I loop through lists on lines 294, 361, and others. I also have a HUGE chunk of code I commented out, but didn't delete where I looped through a list on line 313.
 
 ## 03
 
@@ -66,7 +66,7 @@ I know it doesn't count for this project, but I just want to note that I was usi
 
 DONE - twice. Three times if you count the abandoned work in the "first idea" folder. I was going to make a program the drew a voronoi diagram, but then I realized that I couldn't think of enough for it to do that would meet enough objectives. I was going to brute for the generation of a picture, but I don't know the math well enough to build a voronoi data structure that I think could have met everything.
 
-Lines 41 and 412.
+Lines 41, and 419.
 
 ## 05
 
@@ -74,7 +74,7 @@ DONE.
 
 Every line with error_log.write().
 
-Lines 271, 509, 511, 517, and more.
+Lines 277, 515, 523, and more.
 
 I was also going to make a tiny program to make the game.data text file, but I'm out of time.
 
@@ -82,13 +82,13 @@ I was also going to make a tiny program to make the game.data text file, but I'm
 
 DONE
 
-Lines 40, 58, 412, 450, 501, and 549.
+Lines 40, 58, 418, 456, 507, and 555.
 
 ## 07
 
 DONE
 
-game_levels on line 569 is filled with other lists on line 557, which are themselves lists of tuples from line 552.
+game_levels on line 602 is filled with other lists on line 563, which are themselves lists of tuples from line 558.
 
 ## 08
 
@@ -102,7 +102,7 @@ NOT done. Because of 08.
 
 ## 10
 
-Line 356 hits each object just once per update.
+Line 362 hits each object just once per update.
 
 All of the file operations are very close too, but the go_back_one_line() function creates a tiny amount of redone work.
 
@@ -122,7 +122,7 @@ Lines 16 and 84.
 
 DONE.
 
-Lines 72, as well as lines 106, 114, 120, and more.
+Lines 72, as well as lines 112, 120, 126, and more.
 
 ## 14
 
