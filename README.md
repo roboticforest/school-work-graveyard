@@ -7,7 +7,7 @@ Beware zombies. 🧟🧟‍♂️🧟‍♀️
 
 This is an archive of my software engineering projects. Some projects are big, some small, and some are ungraded little tests or explorations of an idea that didn't go anywhere.
 
-Browse freely, but if you're a student NO CHEATING! All code here is being provided as a sample of my work and coding style only. If I am ever made aware of any copying or plagerism of my work I will inform your school without hesitation.
+Browse freely, but if you're a student NO CHEATING! All code here is being provided as a sample of my work and coding style only. If I am ever made aware of any copying or plagiarism of my work I will inform your school without hesitation.
 
 ## Running My Code
 
