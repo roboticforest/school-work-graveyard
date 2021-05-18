@@ -1,0 +1,66 @@
+# Define game objects.
+
+new object
+kind=slider
+name=big block
+size=100
+speed=1
+points=5
+
+new object
+name = medium slow
+kind = slider
+color=yellow
+size = 50
+speed = 1
+points= 10
+
+new object
+name= racecar
+kind= slider
+color=red
+size = 25
+speed = 3
+points = 30
+
+new object
+name= ping pong ball
+kind = bouncer
+color = white
+size = 10
+speed = 3
+points = 30
+
+new object
+name = big ball
+kind = bouncer
+size = 30
+color = green
+points = 5
+
+# Define levels
+
+new level
+1, big block
+1, big ball
+
+new level
+3, big ball
+1, medium slow
+
+new level
+1, big ball
+1, ping pong ball
+1, racecar
+
+new level
+2, big ball
+3, ping pong ball
+
+new level
+2, big block
+3, medium slow
+4, racecar
+5, ping pong ball
+2, big ball
+
