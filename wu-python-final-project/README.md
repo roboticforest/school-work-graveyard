@@ -2,11 +2,11 @@
 
 ![Gameplay Demo](https://github.com/roboticforest/school-work-graveyard/blob/main/wu-python-final-project/media/gameplay-demo-converted-by-ezgif.com-gif-maker.gif "Gameplay Demo")
 
+---
+
 ## Assignment
 
 We were given a list of 25 learning objectives that had been covered since the midterm exam. It was decided that we would *not* be doing a final exam and instead were allowed to work on whatever "mini-project" we wanted, so long as we hit about 18 of the learning objectives presented.
-
----
 
 ### My First Idea: Voronoi Cells
 
@@ -51,3 +51,11 @@ new level
 3, ping pong ball
 2, racecar
 ```
+
+---
+
+# Copyright
+
+Portable Graphics Library (PGL) © Professor Eric Roberts
+
+PGL was provided to students at Willamette University as an educational tool in the Computer Science Department and was required for many assignments and class projects.
