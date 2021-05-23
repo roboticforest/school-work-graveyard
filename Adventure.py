@@ -2,6 +2,8 @@
 # ------------------
 # This program plays the CS 151 Adventure game.
 
+import os
+import platform
 from AdvGame import AdvGame
 
 # Constants
@@ -19,6 +21,10 @@ def adventure():
     if game is None:
         print("Failed to load the adventure. Game could not start.")
     else:
+        if platform.system() == "Windows":
+            os.system("cls")
+        elif platform.system() == "Linux":
+            os.system("clear")
         game.run()
 
 
