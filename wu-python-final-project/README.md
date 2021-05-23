@@ -1,4 +1,4 @@
-# Willamette University: Python 3 Class - Final Project
+# Willamette University: Python 3 Class - Final Exam Project
 
 ![Gameplay Demo](https://github.com/roboticforest/school-work-graveyard/blob/main/wu-python-final-project/media/gameplay-demo-converted-by-ezgif.com-gif-maker.gif "Gameplay Demo")
 
