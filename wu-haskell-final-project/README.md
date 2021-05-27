@@ -15,3 +15,10 @@ Professor Fritz admitted that he wasn't very experienced with graphics programmi
 
 I decided to rebuild and improved his library. All drawing is now done in a square space with coordinates going from -1 to 1. This space is automatically scaled to fit within the drawing area, meaning the aspect ratio and pixel resolution of the final image are independent of the drawing space. I also implemented anti-aliasing, improved shape masking, and instead of outputting Windows Bitmap (BMP) files I generate [Portable Pixmap](https://en.wikipedia.org/wiki/Netpbm) (PPM) files.
 
+# Sample Renderings
+
+![An image of a solar system.](https://github.com/roboticforest/school-work-graveyard/blob/main/wu-haskell-final-project/github-media/Planets.png "Planets")
+
+![An image of a tunnel made from rotated boxes.](https://github.com/roboticforest/school-work-graveyard/blob/main/wu-haskell-final-project/github-media/Tunnel.png "Box Tunnel")
+
+![A test image for gradients, masks, antialiasing, and patterns.](https://github.com/roboticforest/school-work-graveyard/blob/main/wu-haskell-final-project/github-media/Mickey%20Mask.png "Mickey Mouse Masking Test")
